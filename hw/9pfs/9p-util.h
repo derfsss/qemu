@@ -99,12 +99,23 @@ static inline int errno_to_dotl(int err) {
     return err;
 }
 
-#ifdef CONFIG_DARWIN
+#if defined(CONFIG_DARWIN)
 #define qemu_fgetxattr(...) fgetxattr(__VA_ARGS__, 0, 0)
+#elif defined(CONFIG_WIN32)
+#define qemu_fgetxattr fgetxattr_win32
 #else
 #define qemu_fgetxattr fgetxattr
 #endif
 
+#ifdef CONFIG_WIN32
+#define qemu_openat     openat_win32
+#define qemu_fstatat    fstatat_win32
+#define qemu_mkdirat    mkdirat_win32
+#define qemu_renameat   renameat_win32
+#define qemu_utimensat  utimensat_win32
+#define qemu_unlinkat   unlinkat_win32
+#define qemu_futimens   futimens_win32
+#else
 #define qemu_openat     openat
 #define qemu_fstat      fstat
 #define qemu_fstatat    fstatat
@@ -113,6 +124,25 @@ static inline int errno_to_dotl(int err) {
 #define qemu_utimensat  utimensat
 #define qemu_unlinkat   unlinkat
 #define qemu_futimens   futimens
+#endif
+
+#ifdef CONFIG_WIN32
+char *get_full_path_win32(HANDLE hDir, const char *name);
+ssize_t fgetxattr_win32(int fd, const char *name, void *value, size_t size);
+int openat_win32(int dirfd, const char *pathname, int flags, mode_t mode);
+int fstatat_win32(int dirfd, const char *pathname,
+                  struct stat *statbuf, int flags);
+int mkdirat_win32(int dirfd, const char *pathname, mode_t mode);
+int renameat_win32(int olddirfd, const char *oldpath,
+                   int newdirfd, const char *newpath);
+int utimensat_win32(int dirfd, const char *pathname,
+                    const struct timespec times[2], int flags);
+int unlinkat_win32(int dirfd, const char *pathname, int flags);
+int futimens_win32(int fd, const struct timespec times[2]);
+int statfs_win32(const char *root_path, struct statfs *stbuf);
+int openat_dir(int dirfd, const char *name);
+int openat_file(int dirfd, const char *name, int flags, mode_t mode);
+#endif
 
 static inline void close_preserve_errno(int fd)
 {
@@ -121,6 +151,7 @@ static inline void close_preserve_errno(int fd)
     errno = serrno;
 }
 
+#ifndef CONFIG_WIN32
 /**
  * close_if_special_file() - Close @fd if neither regular file nor directory.
  *
@@ -210,6 +241,7 @@ again:
     }
     return fd;
 }
+#endif
 
 #ifdef CONFIG_FREEBSD
 ssize_t fgetxattr(int dirfd, const char *name, void *value, size_t size);

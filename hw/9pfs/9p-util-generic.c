@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 
 #include "qemu/osdep.h"
+#include "9p.h"
 #include "9p-util.h"
 
 char *qemu_open_flags_tostr(int flags)
@@ -10,17 +11,27 @@ char *qemu_open_flags_tostr(int flags)
         (acc == O_WRONLY) ? "WRONLY" : (acc == O_RDONLY) ? "RDONLY" : "RDWR",
         (flags & O_CREAT) ? "|CREAT" : "",
         (flags & O_EXCL) ? "|EXCL" : "",
+        #ifdef O_NOCTTY
         (flags & O_NOCTTY) ? "|NOCTTY" : "",
+        #endif
         (flags & O_TRUNC) ? "|TRUNC" : "",
         (flags & O_APPEND) ? "|APPEND" : "",
+        #ifdef O_NONBLOCK
         (flags & O_NONBLOCK) ? "|NONBLOCK" : "",
+        #endif
+        #ifdef O_DSYNC
         (flags & O_DSYNC) ? "|DSYNC" : "",
+        #endif
         #ifdef O_DIRECT
         (flags & O_DIRECT) ? "|DIRECT" : "",
         #endif
         (flags & O_LARGEFILE) ? "|LARGEFILE" : "",
+        #ifdef O_DIRECTORY
         (flags & O_DIRECTORY) ? "|DIRECTORY" : "",
+        #endif
+        #ifdef O_NOFOLLOW
         (flags & O_NOFOLLOW) ? "|NOFOLLOW" : "",
+        #endif
         #ifdef O_NOATIME
         (flags & O_NOATIME) ? "|NOATIME" : "",
         #endif
@@ -30,7 +41,9 @@ char *qemu_open_flags_tostr(int flags)
         #ifdef __O_SYNC
         (flags & __O_SYNC) ? "|SYNC" : "",
         #else
+        #ifdef O_SYNC
         ((flags & O_SYNC) == O_SYNC) ? "|SYNC" : "",
+        #endif
         #endif
         #ifdef O_PATH
         (flags & O_PATH) ? "|PATH" : "",

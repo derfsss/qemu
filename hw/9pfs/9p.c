@@ -1752,7 +1752,12 @@ static void coroutine_fn v9fs_setattr(void *opaque)
             times[1].tv_nsec = UTIME_OMIT;
         }
         if (fid_has_valid_file_handle(pdu->s, fidp)) {
+#ifdef CONFIG_WIN32
+            /* futimens is not supported on Windows - perform fallaback isntead */
+            err = v9fs_co_utimensat(pdu, &fidp->path, times);
+#else
             err = v9fs_co_futimens(pdu, fidp, times);
+#endif
         } else {
             err = v9fs_co_utimensat(pdu, &fidp->path, times);
         }
