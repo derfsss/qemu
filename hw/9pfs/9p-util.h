@@ -156,6 +156,12 @@ int futimens_win32(int fd, const struct timespec times[2]);
 int statfs_win32(const char *root_path, struct statfs *stbuf);
 int openat_dir(int dirfd, const char *name);
 int openat_file(int dirfd, const char *name, int flags, mode_t mode);
+DIR *opendir_win32(const char *full_file_name);
+int closedir_win32(DIR *pDir);
+struct dirent *readdir_win32(DIR *pDir);
+void rewinddir_win32(DIR *pDir);
+void seekdir_win32(DIR *pDir, long pos);
+long telldir_win32(DIR *pDir);
 #endif
 
 static inline void close_preserve_errno(int fd)
