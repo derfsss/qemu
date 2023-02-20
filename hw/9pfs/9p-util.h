@@ -115,6 +115,13 @@ static inline int errno_to_dotl(int err) {
 #define qemu_utimensat  utimensat_win32
 #define qemu_unlinkat   unlinkat_win32
 #define qemu_futimens   futimens_win32
+
+#define qemu_opendir    opendir_win32
+#define qemu_closedir   closedir_win32
+#define qemu_readdir    readdir_win32
+#define qeme_rewinddir  rewinddir_win32
+#define qemu_seekdir    seekdir_win32
+#define qemu_telldir    telldir_win32
 #else
 #define qemu_openat     openat
 #define qemu_fstat      fstat
@@ -124,6 +131,13 @@ static inline int errno_to_dotl(int err) {
 #define qemu_utimensat  utimensat
 #define qemu_unlinkat   unlinkat
 #define qemu_futimens   futimens
+
+#define qemu_opendir    opendir
+#define qemu_closedir   closedir
+#define qemu_readdir    readdir
+#define qeme_rewinddir  rewinddir
+#define qemu_seekdir    seekdir
+#define qemu_telldir    telldir
 #endif
 
 #ifdef CONFIG_WIN32
