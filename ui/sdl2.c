@@ -122,7 +122,17 @@ void sdl2_window_create(struct sdl2_console *scon)
         SDL_GL_SetSwapInterval(0);
 
 #ifdef CONFIG_OPENGL
-        qemu_egl_display = eglGetCurrentDisplay();
+        /*
+         * On Windows, SDL gl=on creates a WGL desktop-GL context with no
+         * EGL present, so eglGetCurrentDisplay() dispatches through a NULL
+         * pointer and crashes before any output.  Only query the EGL
+         * display when EGL is actually available at runtime; otherwise
+         * leave qemu_egl_display NULL (dmabuf is reported unsupported,
+         * which is correct for desktop GL).
+         */
+        if (epoxy_has_egl()) {
+            qemu_egl_display = eglGetCurrentDisplay();
+        }
 #endif
     } else {
         /* The SDL renderer is only used by sdl2-2D, when OpenGL is disabled */
