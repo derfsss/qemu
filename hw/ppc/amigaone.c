@@ -280,8 +280,9 @@ static void amigaone_init(MachineState *machine)
     /* init CPU */
     cpu = POWERPC_CPU(cpu_create(machine->cpu_type));
     env = &cpu->env;
-    if (PPC_INPUT(env) != PPC_FLAGS_INPUT_6xx) {
-        error_report("Incompatible CPU, only 6xx bus supported");
+    if (PPC_INPUT(env) != PPC_FLAGS_INPUT_6xx &&
+        PPC_INPUT(env) != PPC_FLAGS_INPUT_970) {
+        error_report("Incompatible CPU, only 6xx or 970 bus supported");
         exit(1);
     }
     cpu_ppc_tb_init(env, BUS_FREQ_HZ / 4);
@@ -361,7 +362,8 @@ static void amigaone_init(MachineState *machine)
                               "date");
     qdev_connect_gpio_out_named(DEVICE(via), "intr", 0,
                                 qdev_get_gpio_in(DEVICE(cpu),
-                                PPC6xx_INPUT_INT));
+                                PPC_INPUT(env) == PPC_FLAGS_INPUT_970 ?
+                                PPC970_INPUT_INT : PPC6xx_INPUT_INT));
     for (int i = 0; i < PCI_NUM_PINS; i++) {
         qdev_connect_gpio_out(dev, i, qdev_get_gpio_in_named(DEVICE(via),
                                                              "pirq", i));
@@ -420,7 +422,7 @@ static void amigaone_machine_init(MachineClass *mc)
     mc->desc = "Eyetech AmigaOne/Mai Logic Teron";
     mc->init = amigaone_init;
     mc->block_default_type = IF_IDE;
-    mc->default_cpu_type = POWERPC_CPU_TYPE_NAME("7457_v1.2");
+    mc->default_cpu_type = POWERPC_CPU_TYPE_NAME("970fx_v3.1");
     mc->default_display = "std";
     mc->default_ram_id = "ram";
     mc->default_ram_size = 512 * MiB;
